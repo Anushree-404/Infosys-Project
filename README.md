@@ -1,0 +1,1 @@
+# AI-Based-Irrigation-Management-System-for-Predictive-Water-Scheduling---Crop-Optimization-July-2026
