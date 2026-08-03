@@ -169,7 +169,7 @@ docker-compose down
 | /dashboard/sensors | Sensor management |
 | /dashboard/weather | Weather forecast |
 
-## 🔮 Phase 2 (Coming Soon)
+## 🔮 Phase 2
 
 - Field & Sensor CRUD operations
 - IoT MQTT sensor data streaming
