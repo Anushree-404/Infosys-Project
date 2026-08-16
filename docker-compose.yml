@@ -20,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API
+  # Backend API (Node.js + Express)
   backend:
     build:
       context: ./backend
@@ -38,13 +38,14 @@ services:
       JWT_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
       FRONTEND_URL: http://localhost:3000
+      ML_SERVICE_URL: http://ml_service:8000
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - ./backend/uploads:/app/uploads
 
-  # Frontend
+  # Frontend (Next.js)
   frontend:
     build:
       context: ./frontend
@@ -55,6 +56,24 @@ services:
       - '3000:3000'
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:5000/api
+    depends_on:
+      - backend
+
+  # ML Service (FastAPI)
+  ml_service:
+    image: python:3.11-slim
+    container_name: irrigation_ml
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./ml/fastapi_service:/app
+      - ./ml/models:/app/../models
+      - ./ml/processed_data:/app/../processed_data
+    command: >
+      sh -c "pip install -r requirements.txt -q &&
+             python -m uvicorn main:app --host 0.0.0.0 --port 8000"
     depends_on:
       - backend
 

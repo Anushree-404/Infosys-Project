@@ -1,0 +1,116 @@
+=================================================================
+PHASE 3: MODEL TRAINING
+=================================================================
+
+Training set : (4000, 34)
+Test set     : (1000, 34)
+Class balance (train): {0: 2080, 1: 1920}
+Class balance (test) : {0: 520, 1: 480}
+
+=================================================================
+TRAINING ALL MODELS
+=================================================================
+
+  [Logistic Regression]
+    Accuracy  : 0.9600
+    Precision : 0.9583
+    Recall    : 0.9583
+    F1 Score  : 0.9583
+    ROC-AUC   : 0.9838
+    CV F1     : 0.9516 (+/- 0.0072)
+    Train time: 0.0s
+
+  [Random Forest]
+    Accuracy  : 0.9480
+    Precision : 0.9350
+    Recall    : 0.9583
+    F1 Score  : 0.9465
+    ROC-AUC   : 0.9888
+    CV F1     : 0.9418 (+/- 0.0077)
+    Train time: 0.6s
+
+  [Gradient Boosting]
+    Accuracy  : 0.9780
+    Precision : 0.9712
+    Recall    : 0.9833
+    F1 Score  : 0.9772
+    ROC-AUC   : 0.9981
+    CV F1     : 0.9705 (+/- 0.0037)
+    Train time: 3.8s
+
+  [SVM]
+    Accuracy  : 0.9520
+    Precision : 0.9481
+    Recall    : 0.9521
+    F1 Score  : 0.9501
+    ROC-AUC   : 0.9831
+    CV F1     : 0.9442 (+/- 0.0024)
+    Train time: 1.1s
+
+  [KNN]
+    Accuracy  : 0.8780
+    Precision : 0.8761
+    Recall    : 0.8688
+    F1 Score  : 0.8724
+    ROC-AUC   : 0.9513
+    CV F1     : 0.8853 (+/- 0.0148)
+    Train time: 0.0s
+
+=================================================================
+MODEL COMPARISON
+=================================================================
+
+                     accuracy  precision    recall        f1   roc_auc  cv_f1_mean
+Gradient Boosting       0.978   0.971193  0.983333  0.977226  0.998101    0.970458
+Logistic Regression     0.960   0.958333  0.958333  0.958333  0.983814    0.951631
+SVM                     0.952   0.948133  0.952083  0.950104  0.983069    0.944224
+Random Forest           0.948   0.934959  0.958333  0.946502  0.988754    0.941757
+KNN                     0.878   0.876050  0.868750  0.872385  0.951270    0.885275
+
+  Best Model: Gradient Boosting
+  F1 Score  : 0.9772
+  ROC-AUC   : 0.9981
+
+  Classification Report — Gradient Boosting:
+               precision    recall  f1-score   support
+
+No Irrigation       0.98      0.97      0.98       520
+   Irrigation       0.97      0.98      0.98       480
+
+     accuracy                           0.98      1000
+    macro avg       0.98      0.98      0.98      1000
+ weighted avg       0.98      0.98      0.98      1000
+
+
+  Top 15 Important Features (Random Forest):
+    soil_moisture_pct                   0.7134  #######################################################################
+    temperature_c                       0.0609  ######
+    rainfall_mm                         0.0256  ##
+    potassium_ppm                       0.0217  ##
+    wind_speed_kmh                      0.0216  ##
+    evapotranspiration                  0.0213  ##
+    nitrogen_ppm                        0.0210  ##
+    soil_ph                             0.0209  ##
+    humidity_pct                        0.0205  ##
+    phosphorus_ppm                      0.0192  #
+    growth_stage_enc                    0.0072  
+    region_South                        0.0029  
+    season_Rabi                         0.0027  
+    irrigation_method_Sprinkler         0.0026  
+    season_Zaid                         0.0026  
+  Saved: visualizations/feature_importance.png
+
+  Saving confusion matrices...
+  Saved: visualizations/confusion_matrices.png
+  Saving ROC curves...
+  Saved: visualizations/roc_curves.png
+  Saved: visualizations/model_comparison.png
+
+=================================================================
+SAVING MODELS
+=================================================================
+  best_model.pkl                              748,873 bytes
+  gradient_boosting.pkl                       748,873 bytes
+  logistic_regression.pkl                       1,983 bytes
+  random_forest.pkl                         7,871,241 bytes
+  results_summary.pkl                           1,513 bytes

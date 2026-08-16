@@ -66,7 +66,6 @@ const navItems: NavItem[] = [
     label: 'Irrigation AI',
     href: '/dashboard/irrigation',
     icon: <Droplets className="w-5 h-5" />,
-    badge: 'Soon',
   },
 ];
 

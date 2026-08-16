@@ -1,0 +1,91 @@
+============================================================
+MODEL 1: IRRIGATION PREDICTION (REAL KAGGLE DATA)
+============================================================
+  Training: (8000, 35) | Test: (2000, 35)
+  Class balance train: {0: 4691, 1: 3309}
+
+  [Random Forest]
+    Accuracy  : 0.9945
+    F1 Score  : 0.9933
+    ROC-AUC   : 0.9999
+                        precision    recall  f1-score   support
+
+     No/Low Irrigation       0.99      1.00      1.00      1173
+Medium/High Irrigation       1.00      0.99      0.99       827
+
+              accuracy                           0.99      2000
+             macro avg       0.99      0.99      0.99      2000
+          weighted avg       0.99      0.99      0.99      2000
+
+
+  [Gradient Boosting]
+    Accuracy  : 0.9995
+    F1 Score  : 0.9994
+    ROC-AUC   : 1.0000
+                        precision    recall  f1-score   support
+
+     No/Low Irrigation       1.00      1.00      1.00      1173
+Medium/High Irrigation       1.00      1.00      1.00       827
+
+              accuracy                           1.00      2000
+             macro avg       1.00      1.00      1.00      2000
+          weighted avg       1.00      1.00      1.00      2000
+
+
+  Best: Gradient Boosting (F1=0.9994)
+
+  Top 12 features:
+    Soil_Moisture                            0.2004
+    Crop_Growth_Stage_Harvest                0.1658
+    Crop_Growth_Stage_Sowing                 0.1652
+    Wind_Speed_kmh                           0.1299
+    Mulching_Used_Yes                        0.1268
+    Rainfall_mm                              0.1126
+    Temperature_C                            0.0836
+    Crop_Growth_Stage_Vegetative             0.0146
+    Soil_pH                                  0.0002
+    Organic_Carbon                           0.0002
+    Previous_Irrigation_mm                   0.0002
+    Crop_Type_Wheat                          0.0001
+
+  [OK] best_model.pkl UPDATED with Kaggle-trained model (F1=0.9994)
+  [OK] kaggle_irr_feature_importance.png saved
+
+============================================================
+MODEL 2: CROP RECOMMENDATION (22 CROPS)
+============================================================
+  Training: (1760, 7) | Classes: 22 crops
+
+  [Random Forest]
+    Accuracy : 0.9955
+    F1 (weighted): 0.9955
+
+  [Gradient Boosting]
+    Accuracy : 0.9864
+    F1 (weighted): 0.9864
+
+  Best: Random Forest (F1=0.9955)
+  [OK] kaggle_crop_model.pkl saved
+  [OK] kaggle_crop_confusion.png saved
+
+============================================================
+MODEL 3: TIME-SERIES SOIL MOISTURE (plant_vase2.CSV)
+============================================================
+  Shape: (10289, 12)
+  Columns: ['year', 'month', 'day', 'hour', 'minute', 'second', 'moisture0', 'moisture1', 'moisture2', 'moisture3', 'moisture4', 'irrgation']
+  [SKIP] No valid irrigation column in plant_vase2
+
+============================================================
+KAGGLE TRAINING COMPLETE
+============================================================
+
+  Irrigation model (Gradient Boosting):  Acc=0.9995  F1=0.9994  AUC=1.0000
+  Crop model (Random Forest): Acc=0.9955  F1=0.9955
+
+  Data source: REAL KAGGLE DATASETS
+  Total training samples: 9760
+
+  Models saved:
+    kaggle_irrigation_model.pkl
+    kaggle_crop_model.pkl
+    best_model.pkl (updated if Kaggle F1 > 0.75)

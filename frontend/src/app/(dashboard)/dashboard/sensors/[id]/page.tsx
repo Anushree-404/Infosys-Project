@@ -174,8 +174,6 @@ export default function SensorDetailPage() {
         </Card>
       </div>
 
-      </div>
-
       {/* Latest reading highlight */}
       {latest && (
         <Card>

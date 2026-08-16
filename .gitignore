@@ -33,7 +33,6 @@ backend/uploads/*
 Thumbs.db
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -46,3 +45,13 @@ backend/prisma/migrations/
 
 # TypeScript
 *.tsbuildinfo
+
+# ML — large binary files
+ml/models/*.pkl
+ml/processed_data/*.csv
+ml/visualizations/*.png
+ml/__pycache__/
+ml/**/__pycache__/
+ml/**/*.pyc
+*.pyc
+__pycache__/

@@ -186,6 +186,7 @@ export default function DashboardPage() {
                 { label: 'Register New Field', href: '/dashboard/fields', icon: '🌾', desc: 'Add a farm field' },
                 { label: 'Add Crop', href: '/dashboard/crops', icon: '🌱', desc: 'Track crop growth' },
                 { label: 'Register Sensor', href: '/dashboard/sensors', icon: '📡', desc: 'Connect IoT sensor' },
+                { label: 'AI Irrigation', href: '/dashboard/irrigation', icon: '🤖', desc: 'Get smart recommendation' },
                 { label: 'View Weather', href: '/dashboard/weather', icon: '🌤️', desc: 'Check forecast' },
               ].map(({ label, href, icon, desc }) => (
                 <Link key={href} href={href}>

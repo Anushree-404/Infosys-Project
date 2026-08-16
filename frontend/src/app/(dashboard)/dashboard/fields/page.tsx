@@ -12,6 +12,7 @@ import api from '@/services/api';
 import toast from 'react-hot-toast';
 import type { Field, IrrigationMethod, WaterSource } from '@/types';
 import Link from 'next/link';
+import { getStateNames, getDistrictsByState } from '@/data/indiaLocations';
 
 const SOIL_TYPES = ['Clay Loam', 'Sandy', 'Silty', 'Black Soil', 'Red Soil', 'Loamy', 'Clay', 'Sandy Loam'];
 const IRRIGATION_METHODS: IrrigationMethod[] = ['DRIP', 'SPRINKLER', 'FLOOD', 'FURROW', 'SUBSURFACE', 'RAIN_FED'];
@@ -209,11 +210,27 @@ export default function FieldsPage() {
             </div>
             <div>
               <label className={labelCls}>State</label>
-              <input className={inputCls} placeholder="e.g. Telangana" value={form.state} onChange={set('state')} />
+              <select
+                className={inputCls}
+                value={form.state}
+                onChange={e => setForm(f => ({ ...f, state: e.target.value, district: '' }))}>
+                <option value="">Select state</option>
+                {getStateNames().map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
             <div>
-              <label className={labelCls}>District</label>
-              <input className={inputCls} placeholder="e.g. Warangal" value={form.district} onChange={set('district')} />
+              <label className={labelCls}>District / City</label>
+              <select
+                className={inputCls}
+                value={form.district}
+                onChange={e => setForm(f => ({ ...f, district: e.target.value }))}
+                disabled={!form.state}>
+                <option value="">{form.state ? 'Select district' : 'Select state first'}</option>
+                {getDistrictsByState(form.state).map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              {form.district && (
+                <p className="text-xs text-green-600 mt-1">✅ Weather will be fetched for: {form.district}</p>
+              )}
             </div>
             <div>
               <label className={labelCls}>Village</label>
