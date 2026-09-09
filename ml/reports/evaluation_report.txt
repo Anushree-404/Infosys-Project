@@ -1,0 +1,119 @@
+=================================================================
+PHASE 3: MODEL EVALUATION
+=================================================================
+
+Best model type: GradientBoostingClassifier
+
+=================================================================
+DETAILED EVALUATION — BEST MODEL
+=================================================================
+
+               precision    recall  f1-score   support
+
+No Irrigation       0.98      0.97      0.98       520
+   Irrigation       0.97      0.98      0.98       480
+
+     accuracy                           0.98      1000
+    macro avg       0.98      0.98      0.98      1000
+ weighted avg       0.98      0.98      0.98      1000
+
+  ROC-AUC Score: 0.9981
+  Avg Precision: 0.9981
+
+=================================================================
+THRESHOLD ANALYSIS
+=================================================================
+
+  Threshold | Precision | Recall | F1
+  ----------------------------------------
+  0.30      | 0.9479    | 0.9854 | 0.9663
+  0.35      | 0.9594    | 0.9854 | 0.9723
+  0.40      | 0.9614    | 0.9854 | 0.9733
+  0.45      | 0.9672    | 0.9833 | 0.9752
+  0.50      | 0.9712    | 0.9833 | 0.9772 <-- default
+  0.55      | 0.9772    | 0.9833 | 0.9803
+  0.60      | 0.9793    | 0.9833 | 0.9813
+  0.65      | 0.9833    | 0.9792 | 0.9812
+  0.70      | 0.9853    | 0.9750 | 0.9801
+
+  Optimal threshold for F1: 0.60 (F1=0.9813)
+  Saved: visualizations/threshold_analysis.png
+  Saved: visualizations/precision_recall_curve.png
+
+  Generating learning curves (this takes a moment)...
+  Saved: visualizations/learning_curves.png
+
+=================================================================
+SAMPLE PREDICTIONS (First 10 test records)
+=================================================================
+
+       Actual     Predicted  Probability Correct
+No Irrigation No Irrigation        0.000    [OK]
+     Irrigate      Irrigate        1.000    [OK]
+No Irrigation No Irrigation        0.000    [OK]
+     Irrigate      Irrigate        0.998    [OK]
+     Irrigate      Irrigate        1.000    [OK]
+     Irrigate      Irrigate        1.000    [OK]
+     Irrigate      Irrigate        0.999    [OK]
+     Irrigate      Irrigate        0.999    [OK]
+No Irrigation No Irrigation        0.020    [OK]
+No Irrigation No Irrigation        0.000    [OK]
+
+=================================================================
+PRODUCTION PREDICTION EXAMPLE
+=================================================================
+
+  Input sensor reading:
+    soil_moisture_pct              = 22.0
+    temperature_c                  = 34.5
+    humidity_pct                   = 45.0
+    rainfall_mm                    = 1.2
+    wind_speed_kmh                 = 15.0
+    soil_ph                        = 6.8
+    nitrogen_ppm                   = 55.0
+    phosphorus_ppm                 = 60.0
+    potassium_ppm                  = 95.0
+    evapotranspiration             = 7.5
+
+  [Note] In production, the full 34-feature vector (including
+  one-hot encoded soil_type, crop_type, etc.) would be passed.
+  The preprocessing_pipeline.pkl handles scaling automatically.
+
+=================================================================
+PHASE 3 SUMMARY
+=================================================================
+
+  Best Model     : GradientBoostingClassifier
+  Test Accuracy  : 0.9780
+  Test F1 Score  : 0.9772
+  ROC-AUC        : 0.9981
+  Best Threshold : 0.60
+
+  All model results:
+
+                     accuracy        f1   roc_auc
+Gradient Boosting       0.978  0.977226  0.998101
+Logistic Regression     0.960  0.958333  0.983814
+SVM                     0.952  0.950104  0.983069
+Random Forest           0.948  0.946502  0.988754
+KNN                     0.878  0.872385  0.951270
+
+  PHASE 3 OUTPUTS:
+  models/best_model.pkl           -> Best performing model
+  models/random_forest.pkl        -> Random Forest model
+  models/gradient_boosting.pkl    -> Gradient Boosting model
+  models/logistic_regression.pkl  -> Logistic Regression (baseline)
+
+  VISUALIZATIONS ADDED:
+  feature_importance.png
+  confusion_matrices.png
+  roc_curves.png
+  model_comparison.png
+  threshold_analysis.png
+  precision_recall_curve.png
+  learning_curves.png
+
+  READY FOR PHASE 4:
+  -> FastAPI ML service (/api/predict/irrigation)
+  -> Real-time predictions from sensor data
+  -> Integration with IrriSmart backend

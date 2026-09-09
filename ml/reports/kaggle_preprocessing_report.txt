@@ -1,0 +1,45 @@
+============================================================
+KAGGLE DATASET PREPROCESSING
+============================================================
+
+[1] irrigation_prediction.csv
+    Shape: (10000, 20)
+    Target: Irrigation_Need
+    Target values: {'Low': 5864, 'Medium': 3800, 'High': 336}
+    Missing: 0
+    After dedup: 10000 rows
+    Unique target values: <ArrowStringArray>
+['low', 'medium', 'high']
+Length: 3, dtype: str
+    Multi-level distribution: {0: 5864, 1: 3800, 2: 336}
+    Binary distribution (Medium+High=1): {0: 5864, 1: 4136}
+    Final target balance: {0: 5864, 1: 4136}
+    Categorical cols to encode: ['Soil_Type', 'Crop_Type', 'Crop_Growth_Stage', 'Season', 'Irrigation_Type', 'Water_Source', 'Mulching_Used', 'Region']
+    X_train: (8000, 35)  X_test: (2000, 35)
+    Features (35): ['Soil_pH', 'Soil_Moisture', 'Organic_Carbon', 'Electrical_Conductivity', 'Temperature_C', 'Humidity', 'Rainfall_mm', 'Sunlight_Hours', 'Wind_Speed_kmh', 'Field_Area_hectare', 'Previous_Irrigation_mm', 'Soil_Type_Loamy', 'Soil_Type_Sandy', 'Soil_Type_Silt', 'Crop_Type_Maize', 'Crop_Type_Potato', 'Crop_Type_Rice', 'Crop_Type_Sugarcane', 'Crop_Type_Wheat', 'Crop_Growth_Stage_Harvest', 'Crop_Growth_Stage_Sowing', 'Crop_Growth_Stage_Vegetative', 'Season_Rabi', 'Season_Zaid', 'Irrigation_Type_Drip', 'Irrigation_Type_Rainfed', 'Irrigation_Type_Sprinkler', 'Water_Source_Rainwater', 'Water_Source_Reservoir', 'Water_Source_River', 'Mulching_Used_Yes', 'Region_East', 'Region_North', 'Region_South', 'Region_West']
+    [OK] Saved kaggle_irr_X_train/test, y_train/test, pipeline
+
+[2] Crop_recommendation.csv
+    Shape: (2200, 8)
+    Target: label
+    Crops: 22 unique — ['apple', 'banana', 'blackgram', 'chickpea', 'coconut', 'coffee', 'cotton', 'grapes', 'jute', 'kidneybeans', 'lentil', 'maize', 'mango', 'mothbeans', 'mungbean', 'muskmelon', 'orange', 'papaya', 'pigeonpeas', 'pomegranate', 'rice', 'watermelon']
+    Missing: 0
+    X_train: (1760, 7)  Classes: 22
+    [OK] Saved crop recommendation processed data
+
+[3] plant_vase1.CSV (time-series sensor data)
+    Shape: (4117, 12)
+    Columns: ['year', 'month', 'day', 'hour', 'minute', 'second', 'moisture0', 'moisture1', 'moisture2', 'moisture3', 'moisture4', 'irrgation']
+    Target: irrgation
+    Target values: {False: 4117}
+    Features: ['moisture0', 'moisture1', 'moisture2', 'moisture3', 'moisture4', 'hour_sin', 'hour_cos']
+    Target balance: {0: 4117}
+    X_train: (3293, 7)
+    [OK] Saved plant time-series processed data
+
+============================================================
+PREPROCESSING SUMMARY
+============================================================
+  irrigation_prediction.csv : 8000 train | 2000 test | 35 features
+  Crop_recommendation.csv   : 1760 train | 440 test | 7 features
+  plant_vase1.CSV           : 3293 train | 824 test | 7 features

@@ -1,0 +1,413 @@
+
++==============================================================+
+║         PREPROCESSING PIPELINE — FINAL REPORT               ║
++==============================================================+
+
+PROJECT : AI-Based Irrigation Management System
+PHASE   : Data Preprocessing (Phase 2)
+DATE    : 2026-08-06 16:51:48
+
+DATASETS USED
+-------------
+1. irrigation_data.csv      — Main dataset with 5200+ records (with intentional
+                               quality issues for preprocessing exercise)
+2. soil_data.csv             — Soil properties (1000 samples)
+3. weather_data.csv          — 4 years daily weather (1460 records)
+4. crop_water_requirement.csv — Crop-specific water needs (150 records)
+
+PREPROCESSING STEPS COMPLETED
+------------------------------
+[OK] Step 1: Dataset loading and structure analysis
+[OK] Step 2: Feature purpose documentation
+[OK] Step 3: Data quality checks (missing, duplicates, invalid values)
+[OK] Step 4: Data cleaning
+   • Removed ~200 duplicate rows
+   • Replaced impossible values (rainfall < 0, temp > 80°C, pH < 0)
+   • Imputed numeric NaN -> median (robust to outliers)
+   • Imputed categorical NaN -> mode
+   • Converted date column -> month + day_of_year features
+   • Standardized text formatting
+[OK] Step 5: Categorical encoding
+   • Label Encoding: growth_stage (ordinal, natural order)
+   • One-Hot Encoding: soil_type, crop_type, season, region, irrigation_method
+[OK] Step 6: Outlier treatment (IQR Capping / Winsorizing)
+   • Method: Cap to [Q1 - 1.5*IQR, Q3 + 1.5*IQR]
+   • Decision: Capping over removal to preserve dataset size
+[OK] Step 7: Feature scaling
+   • StandardScaler: soil_moisture, temperature, humidity, pH, NPK, ET
+   • MinMaxScaler: rainfall, wind_speed
+[OK] Step 8: Feature selection
+   • Correlation matrix computed
+   • Redundant features (>0.90 correlation) removed
+[OK] Step 9: Train/Test split — 80/20, stratified, random_state=42
+[OK] Step 10: All outputs saved
+
+OUTPUT FILES
+------------
+  [OK] cleaned_dataset.csv                  1,761,624 bytes
+  [OK] X_train.csv                          1,401,488 bytes
+  [OK] X_test.csv                             350,661 bytes
+  [OK] y_train.csv                             12,019 bytes
+  [OK] y_test.csv                               3,019 bytes
+  [OK] preprocessing_pipeline.pkl               2,114 bytes
+
+VISUALIZATIONS GENERATED
+-------------------------
+  📊 missing_value_heatmap.png
+  📊 missing_value_bar.png
+  📊 feature_distributions.png
+  📊 class_distribution.png
+  📊 categorical_distributions.png
+  📊 correlation_heatmap.png
+  📊 boxplots_before.png
+  📊 boxplots_after.png
+  📊 soil_moisture_analysis.png
+
+READY FOR PHASE 3
+------------------
+The cleaned, encoded, scaled, and split dataset is ready for:
+  -> Random Forest Classifier
+  -> Gradient Boosting (XGBoost/LightGBM)
+  -> LSTM (time-series sensor readings)
+  -> FastAPI ML service integration
+
+preprocessing_pipeline.pkl can be loaded to transform
+new incoming sensor data before prediction:
+
+  import joblib
+  pipeline = joblib.load("processed_data/preprocessing_pipeline.pkl")
+  X_new_scaled = pipeline["std_scaler"].transform(X_new[pipeline["std_cols"]])
+
+
+DETAILED LOGS
+-----------------------------------------------------------------
+
+=================================================================
+DATA_CLEANING_REPORT.TXT
+=================================================================
+=================================================================
+STEP 1: LOADING DATASETS
+=================================================================
+  [OK] Loaded irrigation_data.csv: 5200 rows × 18 columns
+  [OK] Loaded soil_data.csv: 1000 rows × 11 columns
+  [OK] Loaded weather_data.csv: 1460 rows × 12 columns
+  [OK] Loaded crop_water_requirement.csv: 150 rows × 7 columns
+
+=================================================================
+STEP 2: DATASET ANALYSIS
+=================================================================
+
+-------------------------------------------------------
+  Dataset: IRRIGATION_DATA
+  Shape  : 5200 rows × 18 columns
+-------------------------------------------------------
+  Columns and Data Types:
+    record_id                           int64
+    region                              str
+    soil_type                           str
+    crop_type                           str
+    season                              str
+    growth_stage                        str
+    irrigation_method                   str
+    soil_moisture_pct                   float64
+    temperature_c                       float64
+    humidity_pct                        float64
+    rainfall_mm                         float64
+    wind_speed_kmh                      float64
+    soil_ph                             float64
+    nitrogen_ppm                        float64
+    phosphorus_ppm                      float64
+    potassium_ppm                       float64
+    evapotranspiration                  float64
+    irrigation_needed                   int64
+
+  Summary Statistics:
+          record_id   region soil_type  crop_type season growth_stage irrigation_method  soil_moisture_pct  temperature_c  humidity_pct  rainfall_mm  wind_speed_kmh      soil_ph  nitrogen_ppm  phosphorus_ppm  potassium_ppm  evapotranspiration  irrigation_needed
+count   5200.000000     5200      5200       5200   5200         5200              5200        5079.000000    5115.000000   5139.000000  5200.000000     5200.000000  5200.000000   5200.000000     5200.000000    5200.000000         5200.000000        5200.000000
+unique          NaN        5         6         10      3            5                 4                NaN            NaN           NaN          NaN             NaN          NaN           NaN             NaN            NaN                 NaN                NaN
+top             NaN  Central     Sandy  Groundnut   Rabi     Maturity            Furrow                NaN            NaN           NaN          NaN             NaN          NaN           NaN             NaN            NaN                 NaN                NaN
+freq            NaN     1079       913        537   1799         1062              1330                NaN            NaN           NaN          NaN             NaN          NaN           NaN             NaN            NaN                 NaN                NaN
+mean    2497.037115      NaN       NaN        NaN    NaN          NaN               NaN          44.719438      30.422864     57.609056    -4.511213       12.734635     6.371287     69.985159       72.065327     102.201265            6.456208           0.480769
+std     1445.273612      NaN       NaN        NaN    NaN          NaN               NaN          20.269191      12.643974     21.832262    98.133492        7.218436     1.527672     40.372272       42.000321      59.421313            3.184199           0.499678
+min        1.000000      NaN       NaN        NaN    NaN          NaN               NaN          10.000814      15.001585     20.011831  -999.000000        0.001203    -5.000000      0.000775        0.026106       0.003431            1.001152           0.000000
+25%     1242.750000      NaN       NaN        NaN    NaN          NaN               NaN          27.061518      22.412572     38.527309     1.463888        6.490638     5.464618     34.634694       35.757502      50.780808            3.652113           0.000000
+50%     2499.500000      NaN       NaN        NaN    NaN          NaN               NaN          44.787444      29.621244     57.202242     3.562285       12.880832     6.438017     70.133069       72.417762     100.893769            6.480549           0.000000
+75%     3747.250000      NaN       NaN        NaN    NaN          NaN               NaN          62.274939      37.078334     77.141562     6.933508       18.961781     7.414595    104.512017      108.261940     154.557007            9.237885           1.000000
+max     5000.000000      NaN       NaN        NaN    NaN          NaN               NaN          79.980237     150.000000     94.985386    47.478581       24.997524     8.498928    139.970512      144.893959     204.994290           11.999526           1.000000
+
+  Target variable: 'irrigation_needed'
+  Class distribution:
+irrigation_needed
+0    2700
+1    2500
+
+-------------------------------------------------------
+  Dataset: SOIL_DATA
+  Shape  : 1000 rows × 11 columns
+-------------------------------------------------------
+  Columns and Data Types:
+    sample_id                           int64
+    soil_type                           str
+    sand_pct                            float64
+    silt_pct                            float64
+    clay_pct                            float64
+    organic_matter                      float64
+    water_retention                     float64
+    bulk_density                        float64
+    ec_ds_m                             float64
+    ph                                  float64
+    cec                                 float64
+
+  Summary Statistics:
+          sample_id soil_type     sand_pct     silt_pct     clay_pct  organic_matter  water_retention  bulk_density      ec_ds_m           ph          cec
+count   1000.000000      1000  1000.000000  1000.000000  1000.000000      940.000000       960.000000   1000.000000  1000.000000  1000.000000  1000.000000
+unique          NaN         6          NaN          NaN          NaN             NaN              NaN           NaN          NaN          NaN          NaN
+top             NaN      Silt          NaN          NaN          NaN             NaN              NaN           NaN          NaN          NaN          NaN
+freq            NaN       186          NaN          NaN          NaN             NaN              NaN           NaN          NaN          NaN          NaN
+mean     500.500000       NaN    49.664934    26.607687    33.453015        4.164684         0.294900      1.400685     2.029400     6.520027    22.178114
+std      288.819436       NaN    23.219324    13.174030    15.674078        2.192878         0.112246      0.230348     1.116286     1.165523    10.156178
+min        1.000000       NaN    10.011242     5.021578     5.123320        0.500220         0.100039      1.000831     0.104254     4.500714     5.026322
+25%      250.750000       NaN    28.846098    14.898507    19.980114        2.204073         0.199783      1.203168     1.077150     5.499585    13.426955
+50%      500.500000       NaN    49.369867    26.095794    34.420056        4.194897         0.285556      1.408454     2.038493     6.547450    21.892215
+75%      750.250000       NaN    69.714187    37.652505    47.290774        6.019373         0.389749      1.603982     2.948265     7.529195    30.808524
+max     1000.000000       NaN    89.954335    49.981639    59.998679        7.987515         0.498573      1.799890     3.995695     8.495977    39.965880
+
+-------------------------------------------------------
+  Dataset: WEATHER_DATA
+  Shape  : 1460 rows × 12 columns
+-------------------------------------------------------
+  Columns and Data Types:
+    date                                str
+    region                              str
+    temp_max_c                          float64
+    temp_min_c                          float64
+    temp_avg_c                          float64
+    rainfall_mm                         float64
+    humidity_pct                        float64
+    wind_speed_kmh                      float64
+    sunshine_hours                      float64
+    uv_index                            int64
+    cloud_cover_pct                     float64
+    evapotrans_mm                       float64
+
+  Summary Statistics:
+              date region   temp_max_c   temp_min_c   temp_avg_c  rainfall_mm  humidity_pct  wind_speed_kmh  sunshine_hours     uv_index  cloud_cover_pct  evapotrans_mm
+count         1460   1460  1460.000000  1460.000000  1460.000000  1380.000000   1410.000000     1460.000000     1460.000000  1460.000000      1460.000000    1460.000000
+unique        1460      5          NaN          NaN          NaN          NaN           NaN             NaN             NaN          NaN              NaN            NaN
+top     2020-01-01  South          NaN          NaN          NaN          NaN           NaN             NaN             NaN          NaN              NaN            NaN
+freq             1    313          NaN          NaN          NaN          NaN           NaN             NaN             NaN          NaN              NaN            NaN
+mean           NaN    NaN    33.961023    19.134621    27.311353     4.066367     61.368801       14.921808        6.051730     4.903425        49.857113       5.477069
+std            NaN    NaN     7.901098     6.291642     7.284316     3.947814     21.409298        8.855184        3.479871     3.134782        28.978173       2.621864
+min            NaN    NaN    20.025148     8.002154    15.008728     0.003562     25.002010        0.013080        0.000629     0.000000         0.103113       1.028428
+25%            NaN    NaN    27.083810    13.722836    20.760171     1.213762     42.199506        7.351970        3.071170     2.000000        24.758633       3.078030
+50%            NaN    NaN    33.807633    19.231764    27.332390     2.841958     61.005231       14.531954        6.070990     5.000000        50.400524       5.639279
+75%            NaN    NaN    40.620061    24.596160    33.746861     5.666487     80.476517       22.763422        9.110168     8.000000        75.424944       7.778037
+max            NaN    NaN    47.939283    29.977401    39.989711    24.658092     97.871963       29.912977       11.996774    10.000000        99.980578       9.997859
+
+-------------------------------------------------------
+  Dataset: CROP_WATER_REQUIREMENT
+  Shape  : 150 rows × 7 columns
+-------------------------------------------------------
+  Columns and Data Types:
+    crop_type                           str
+    growth_stage                        str
+    season                              str
+    water_req_mm_day                    float64
+    kc_coefficient                      float64
+    days_in_stage                       int64
+    sensitive_to_water                  int64
+
+  Summary Statistics:
+       crop_type growth_stage  season  water_req_mm_day  kc_coefficient  days_in_stage  sensitive_to_water
+count        150          150     150        150.000000      150.000000     150.000000          150.000000
+unique        10            5       3               NaN             NaN            NaN                 NaN
+top         Rice     Seedling  Kharif               NaN             NaN            NaN                 NaN
+freq          15           30      50               NaN             NaN            NaN                 NaN
+mean         NaN          NaN     NaN          7.291263        0.772065      26.606667            0.713333
+std          NaN          NaN     NaN          2.993171        0.293981       9.386479            0.453719
+min          NaN          NaN     NaN          2.058982        0.301221      10.000000            0.000000
+25%          NaN          NaN     NaN          5.000804        0.500134      19.000000            0.000000
+50%          NaN          NaN     NaN          7.204461        0.803062      26.500000            1.000000
+75%          NaN          NaN     NaN         10.017454        0.996793      35.000000            1.000000
+max          NaN          NaN     NaN         11.983077        1.249833      44.000000            1.000000
+
+  FEATURE PURPOSE — IRRIGATION DATASET:
+    record_id                      → Unique row identifier (drop before modelling)
+    region                         → Geographic region of the farm
+    soil_type                      → Soil texture class (Sandy/Loamy/Clay etc.)
+    crop_type                      → Type of crop being grown
+    season                         → Agricultural season (Kharif/Rabi/Zaid)
+    growth_stage                   → Current stage of crop growth
+    irrigation_method              → Method used for irrigation
+    soil_moisture_pct              → % water content in soil — KEY feature for irrigation
+    temperature_c                  → Air temperature in Celsius
+    humidity_pct                   → Relative humidity %
+    rainfall_mm                    → Daily rainfall in millimetres
+    wind_speed_kmh                 → Wind speed affecting evaporation
+    soil_ph                        → pH of soil (affects nutrient absorption)
+    nitrogen_ppm                   → Soil nitrogen concentration
+    phosphorus_ppm                 → Soil phosphorus concentration
+    potassium_ppm                  → Soil potassium concentration
+    evapotranspiration             → Water lost via evaporation + plant transpiration
+    irrigation_needed              → TARGET: 1 = Irrigate, 0 = Do not irrigate
+
+=================================================================
+STEP 3: DATA QUALITY CHECKS
+=================================================================
+
+  [irrigation_data]
+  Missing values:
+    soil_moisture_pct                     121 (2.33%)
+    temperature_c                          85 (1.63%)
+    humidity_pct                           61 (1.17%)
+  Duplicate rows: 200
+  Invalid / impossible values:
+    rainfall_mm                         50 negative values
+    soil_ph                             42 negative values
+
+  [soil_data]
+  Missing values:
+    organic_matter                         60 (6.0%)
+    water_retention                        40 (4.0%)
+  Duplicate rows: 0
+  Invalid / impossible values:
+    None detected (before cleaning)
+
+  [weather_data]
+  Missing values:
+    rainfall_mm                            80 (5.48%)
+    humidity_pct                           50 (3.42%)
+  Duplicate rows: 0
+  Invalid / impossible values:
+    None detected (before cleaning)
+
+  [crop_water_requirement]
+  Missing values:
+    None found [OK]
+  Duplicate rows: 0
+  Invalid / impossible values:
+    None detected (before cleaning)
+
+=================================================================
+STEP 4: DATA CLEANING
+=================================================================
+
+  [Duplicates] Removed 200 duplicate rows from irrigation_data
+  [Columns] Dropped 'record_id' — no predictive value
+  [Columns] Dropped 'sample_id' from soil_data
+  [Invalid] Replaced 50 negative rainfall values with NaN in irrigation_data
+  [Invalid] Replaced 0 negative rainfall values with NaN in weather_data
+  [Invalid] Replaced 30 impossible high + 0 low temperature values with NaN
+  [Invalid] Replaced 40 invalid pH values with NaN
+
+  [Missing Values] Imputation strategy:
+    irrigation_data.soil_moisture_pct            filled 120 NaN → median=44.89
+    irrigation_data.temperature_c                filled 110 NaN → median=29.59
+    irrigation_data.humidity_pct                 filled 60 NaN → median=57.24
+    irrigation_data.rainfall_mm                  filled 50 NaN → median=3.61
+    irrigation_data.soil_ph                      filled 40 NaN → median=6.46
+    soil_data.organic_matter                      filled 60 NaN → median=4.19
+    soil_data.water_retention                     filled 40 NaN → median=0.29
+    weather_data.rainfall_mm                      filled 80 NaN → median=2.84
+    weather_data.humidity_pct                     filled 50 NaN → median=61.01
+
+  [Types] Converted 'date' → extracted month, day_of_year features
+  [Format] Stripped whitespace and title-cased all categorical columns
+
+  Post-cleaning verification:
+    irrigation_data : (5000, 17) | Missing: 0
+    soil_data       : (1000, 10) | Missing: 0
+    weather_data    : (1460, 13) | Missing: 0
+    crop_data       : (150, 7) | Missing: 0
+
+[OK] Cleaned datasets saved to processed_data/
+
+=================================================================
+FEATURE_ENGINEERING_REPORT.TXT
+=================================================================
+=================================================================
+LOADING CLEANED IRRIGATION DATASET
+=================================================================
+Shape: (5000, 17)
+
+=================================================================
+STEP 5: CATEGORICAL ENCODING
+=================================================================
+
+  Label Encoding (Ordinal):
+  'growth_stage' → 'growth_stage_enc'
+  Reason: Natural order exists (Seedling < Vegetative < ... < Maturity)
+  Mapping: {'Seedling': 0, 'Vegetative': 1, 'Flowering': 2, 'Fruiting': 3, 'Maturity': 4, 'Harvesting': 5}
+
+  One-Hot Encoding (Nominal):
+  Columns: ['soil_type', 'crop_type', 'season', 'region', 'irrigation_method']
+  Reason: No inherent order — OHE avoids false ordinal relationships
+  Shape after encoding: (5000, 35)
+
+=================================================================
+STEP 6: OUTLIER DETECTION AND TREATMENT (IQR Method)
+=================================================================
+
+  Saving boxplots (before outlier treatment)...
+  Saved: visualizations/boxplots_before.png
+  rainfall_mm                    outliers:  262  (capped to [-6.50, 14.97])
+
+  Decision: CAPPING (Winsorizing) chosen over removal
+  Reason: Preserves dataset size; agricultural data can have real extreme values
+  Saved: visualizations/boxplots_after.png
+
+=================================================================
+STEP 7: FEATURE SCALING
+=================================================================
+
+  Columns to scale (11): ['soil_moisture_pct', 'temperature_c', 'humidity_pct', 'rainfall_mm', 'wind_speed_kmh', 'soil_ph'] ...
+
+  Scaler choices:
+  → StandardScaler : for soil_moisture, temperature, humidity, pH,
+    evapotranspiration — Gaussian-like distributions, used with SVM/logistic
+  → MinMaxScaler   : for rainfall, wind_speed — skewed distributions,
+    bounded [0,1] range needed for neural networks
+
+  StandardScaler applied to: ['soil_moisture_pct', 'temperature_c', 'humidity_pct', 'soil_ph', 'nitrogen_ppm', 'phosphorus_ppm', 'potassium_ppm', 'evapotranspiration', 'growth_stage_enc']
+  MinMaxScaler applied to  : ['rainfall_mm', 'wind_speed_kmh']
+
+=================================================================
+STEP 8: FEATURE SELECTION
+=================================================================
+
+  Top features correlated with target (irrigation_needed):
+    soil_moisture_pct                   0.8083
+    temperature_c                       0.1769
+    rainfall_mm                         0.0613
+    soil_ph                             0.0375
+    potassium_ppm                       0.0260
+    evapotranspiration                  0.0226
+    wind_speed_kmh                      0.0172
+    phosphorus_ppm                      0.0112
+    humidity_pct                        0.0077
+    nitrogen_ppm                        0.0038
+  No feature pairs with correlation > 0.90 found [OK]
+
+  Final feature count: 34
+  Saved: visualizations/correlation_heatmap.png
+
+=================================================================
+STEP 9: TRAIN / TEST SPLIT  (80% / 20%,  random_state=42)
+=================================================================
+
+  X_train : (4000, 34)
+  X_test  : (1000, 34)
+  y_train : (4000,)  class balance: {0: 2080, 1: 1920}
+  y_test  : (1000,)   class balance: {0: 520, 1: 480}
+
+  stratify=y used → ensures same class distribution in both splits
+
+=================================================================
+STEP 10: SAVING ALL OUTPUTS
+=================================================================
+  [OK] cleaned_dataset.csv   → (5000, 35)
+  [OK] X_train.csv           → (4000, 34)
+  [OK] X_test.csv            → (1000, 34)
+  [OK] y_train.csv           → (4000,)
+  [OK] y_test.csv            → (1000,)
+  [OK] preprocessing_pipeline.pkl saved

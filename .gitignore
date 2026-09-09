@@ -1,0 +1,57 @@
+# Node modules
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+.next/
+build/
+out/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Database
+*.db
+*.sqlite
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+
+# Prisma
+backend/prisma/migrations/
+
+# TypeScript
+*.tsbuildinfo
+
+# ML — large binary files
+ml/models/*.pkl
+ml/processed_data/*.csv
+ml/visualizations/*.png
+ml/__pycache__/
+ml/**/__pycache__/
+ml/**/*.pyc
+*.pyc
+__pycache__/
