@@ -109,12 +109,13 @@ model User {
   lastLoginAt       DateTime? @map("last_login_at")
   deletedAt         DateTime? @map("deleted_at")
 
-  fields            Field[]
-  refreshTokens     RefreshToken[]
-  passwordResets    PasswordReset[]
-  weatherCache      WeatherCache[]
-  notifications     Notification[]
-  pushSubscriptions PushSubscription[]
+  fields             Field[]
+  refreshTokens      RefreshToken[]
+  passwordResets     PasswordReset[]
+  weatherCache       WeatherCache[]
+  notifications      Notification[]
+  pushSubscriptions  PushSubscription[]
+  irrigationFeedback IrrigationFeedback[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -389,7 +390,11 @@ model FieldAssignment {
 // ============================================================
 
 model IrrigationFeedback {
-  id      String @id @default(uuid())
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   fieldId String @map("field_id")
   field   Field  @relation(fields: [fieldId], references: [id], onDelete: Cascade)
 

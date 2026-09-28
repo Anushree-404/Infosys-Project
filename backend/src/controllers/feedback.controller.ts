@@ -15,7 +15,16 @@ export const createFeedback = async (
       waterApplied,
     } = req.body;
 
-    // Validate required fields
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+      return;
+    }
+
     if (!fieldId || !action || !predictionType || !recommendation) {
       res.status(400).json({
         success: false,
@@ -40,9 +49,9 @@ export const createFeedback = async (
       return;
     }
 
-    // Create feedback
     const feedback = await prisma.irrigationFeedback.create({
       data: {
+        userId,
         fieldId,
         action: String(action),
         predictionType: String(predictionType),
