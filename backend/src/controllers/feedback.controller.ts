@@ -6,23 +6,52 @@ export const createFeedback = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { fieldId, action, predictionType, recommendation, reason } = req.body;
+    const {
+      fieldId,
+      action,
+      predictionType,
+      recommendation,
+      reason,
+      waterApplied,
+    } = req.body;
 
+    // Validate required fields
     if (!fieldId || !action || !predictionType || !recommendation) {
       res.status(400).json({
         success: false,
-        message: 'fieldId, action, predictionType and recommendation are required',
+        message:
+          'fieldId, action, predictionType and recommendation are required',
       });
       return;
     }
 
+    // Verify that the field exists
+    const field = await prisma.field.findUnique({
+      where: {
+        id: fieldId,
+      },
+    });
+
+    if (!field) {
+      res.status(404).json({
+        success: false,
+        message: 'Field not found',
+      });
+      return;
+    }
+
+    // Create feedback
     const feedback = await prisma.irrigationFeedback.create({
       data: {
         fieldId,
-        action,
-        predictionType,
-        recommendation,
-        reason: reason || null,
+        action: String(action),
+        predictionType: String(predictionType),
+        recommendation: String(recommendation),
+        reason: reason ? String(reason) : null,
+        waterApplied:
+          waterApplied !== undefined && waterApplied !== null
+            ? Number(waterApplied)
+            : null,
       },
     });
 
