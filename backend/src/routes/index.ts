@@ -12,6 +12,7 @@ import sensorRoutes from './sensor.routes';
 import weatherRoutes from './weather.routes';
 import notificationRoutes from './notification.routes';
 import mlRoutes from './ml.routes';
+import feedbackRoutes from './feedback.routes';
 
 const router = Router();
 
@@ -33,5 +34,6 @@ router.use('/sensors', sensorRoutes);
 router.use('/weather', weatherRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/ml', mlRoutes);
+router.use('/feedback', feedbackRoutes);
 
 export default router;

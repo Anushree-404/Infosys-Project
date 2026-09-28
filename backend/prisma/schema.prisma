@@ -1,4 +1,5 @@
 // Prisma Schema - AI Irrigation Management System Phase 2
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -106,7 +107,7 @@ model User {
   isEmailVerified   Boolean   @default(false) @map("is_email_verified")
   isActive          Boolean   @default(true) @map("is_active")
   lastLoginAt       DateTime? @map("last_login_at")
-  deletedAt         DateTime? @map("deleted_at")
+  deletedAt         DateTime?
 
   fields         Field[]
   refreshTokens  RefreshToken[]
@@ -166,29 +167,30 @@ model PasswordReset {
 // ============================================================
 
 model Field {
-  id               String           @id @default(uuid())
+  id               String            @id @default(uuid())
   name             String
   area             Float
-  areaUnit         String           @default("acres") @map("area_unit")
+  areaUnit         String            @default("acres") @map("area_unit")
   state            String?
   district         String?
   village          String?
   location         String?
   latitude         Float?
   longitude        Float?
-  soilType         String?          @map("soil_type")
+  soilType         String?           @map("soil_type")
   irrigationMethod IrrigationMethod? @map("irrigation_method")
   waterSource      WaterSource?      @map("water_source")
-  status           FieldStatus      @default(ACTIVE)
+  status           FieldStatus       @default(ACTIVE)
   description      String?
-  userId           String           @map("user_id")
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deletedAt        DateTime?        @map("deleted_at")
+  userId           String            @map("user_id")
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt        DateTime?
 
   crops            Crop[]
   sensors          Sensor[]
   weatherData      WeatherData[]
   fieldAssignments FieldAssignment[]
+  feedbacks        IrrigationFeedback[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -204,19 +206,19 @@ model Field {
 // ============================================================
 
 model Crop {
-  id                    String      @id @default(uuid())
-  name                  String
-  variety               String?
-  growthStage           GrowthStage @default(SEEDLING) @map("growth_stage")
-  plantingDate          DateTime?   @map("planting_date")
-  expectedHarvestDate   DateTime?   @map("expected_harvest_date")
-  actualHarvestDate     DateTime?   @map("actual_harvest_date")
-  expectedWaterReq      Float?      @map("expected_water_req") // litres/day
-  currentStatus         CropStatus  @default(GROWING) @map("current_status")
-  notes                 String?
-  fieldId               String      @map("field_id")
-  field                 Field       @relation(fields: [fieldId], references: [id], onDelete: Cascade)
-  deletedAt             DateTime?   @map("deleted_at")
+  id                  String      @id @default(uuid())
+  name                String
+  variety             String?
+  growthStage         GrowthStage @default(SEEDLING) @map("growth_stage")
+  plantingDate        DateTime?   @map("planting_date")
+  expectedHarvestDate DateTime?   @map("expected_harvest_date")
+  actualHarvestDate   DateTime?   @map("actual_harvest_date")
+  expectedWaterReq    Float?      @map("expected_water_req")
+  currentStatus       CropStatus  @default(GROWING) @map("current_status")
+  notes               String?
+  fieldId             String      @map("field_id")
+  field               Field       @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  deletedAt           DateTime?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -242,7 +244,7 @@ model Sensor {
   installationDate DateTime?    @map("installation_date")
   fieldId          String       @map("field_id")
   field            Field        @relation(fields: [fieldId], references: [id], onDelete: Cascade)
-  deletedAt        DateTime?    @map("deleted_at")
+  deletedAt        DateTime?
 
   readings SensorReading[]
 
@@ -264,20 +266,20 @@ model SensorReading {
   id             String   @id @default(uuid())
   sensorId       String   @map("sensor_id")
   sensor         Sensor   @relation(fields: [sensorId], references: [id], onDelete: Cascade)
-  soilMoisture   Float?   @map("soil_moisture")  // percentage 0-100
-  temperature    Float?                           // celsius
-  humidity       Float?                           // percentage 0-100
-  rainfall       Float?                           // mm
-  waterLevel     Float?   @map("water_level")    // cm
-  ph             Float?                           // 0-14
-  nitrogen       Float?                           // ppm
-  phosphorus     Float?                           // ppm
-  potassium      Float?                           // ppm
-  batteryLevel   Float?   @map("battery_level")  // percentage
-  signalStrength Float?   @map("signal_strength") // dBm
+  soilMoisture   Float?   @map("soil_moisture")
+  temperature    Float?
+  humidity       Float?
+  rainfall       Float?
+  waterLevel     Float?   @map("water_level")
+  ph             Float?
+  nitrogen       Float?
+  phosphorus     Float?
+  potassium      Float?
+  batteryLevel   Float?   @map("battery_level")
+  signalStrength Float?   @map("signal_strength")
   isValid        Boolean  @default(true) @map("is_valid")
   invalidReason  String?  @map("invalid_reason")
-  source         String   @default("REST")        // REST | MQTT | TEST
+  source         String   @default("REST")
   timestamp      DateTime @default(now())
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -293,28 +295,28 @@ model SensorReading {
 // ============================================================
 
 model WeatherData {
-  id              String   @id @default(uuid())
-  fieldId         String   @map("field_id")
-  field           Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  id              String    @id @default(uuid())
+  fieldId         String    @map("field_id")
+  field           Field     @relation(fields: [fieldId], references: [id], onDelete: Cascade)
   temperature     Float?
-  feelsLike       Float?   @map("feels_like")
+  feelsLike       Float?    @map("feels_like")
   humidity        Float?
   description     String?
   icon            String?
-  windSpeed       Float?   @map("wind_speed")
-  windDirection   Float?   @map("wind_direction")
+  windSpeed       Float?    @map("wind_speed")
+  windDirection   Float?    @map("wind_direction")
   pressure        Float?
   visibility      Float?
-  uvIndex         Float?   @map("uv_index")
-  rainProbability Float?   @map("rain_probability")
-  rainfall1h      Float?   @map("rainfall_1h")
+  uvIndex         Float?    @map("uv_index")
+  rainProbability Float?    @map("rain_probability")
+  rainfall1h      Float?    @map("rainfall_1h")
   sunrise         DateTime?
   sunset          DateTime?
   location        String?
   country         String?
-  forecastJson    Json?    @map("forecast_json")
-  fetchedAt       DateTime @default(now()) @map("fetched_at")
-  expiresAt       DateTime @map("expires_at")
+  forecastJson    Json?     @map("forecast_json")
+  fetchedAt       DateTime  @default(now()) @map("fetched_at")
+  expiresAt       DateTime  @map("expires_at")
 
   @@index([fieldId])
   @@index([fieldId, expiresAt])
@@ -322,7 +324,7 @@ model WeatherData {
 }
 
 // ============================================================
-// WEATHER CACHE (user-level, kept for dashboard)
+// WEATHER CACHE
 // ============================================================
 
 model WeatherCache {
@@ -351,7 +353,7 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String
   message   String
-  type      String   @default("INFO") // INFO | WARNING | ALERT | SUCCESS
+  type      String   @default("INFO")
   isRead    Boolean  @default(false) @map("is_read")
   metadata  Json?
   createdAt DateTime @default(now()) @map("created_at")
@@ -362,7 +364,7 @@ model Notification {
 }
 
 // ============================================================
-// FIELD ASSIGNMENT (multi-farmer future support)
+// FIELD ASSIGNMENT
 // ============================================================
 
 model FieldAssignment {
@@ -378,4 +380,25 @@ model FieldAssignment {
   @@index([fieldId])
   @@index([assignedTo])
   @@map("field_assignments")
+}
+
+// ============================================================
+// IRRIGATION FEEDBACK
+// ============================================================
+
+model IrrigationFeedback {
+  id      String @id @default(uuid())
+  fieldId String @map("field_id")
+  field   Field  @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  action         String
+  predictionType String  @map("prediction_type")
+  recommendation String  @db.Text
+  reason         String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([fieldId])
+  @@index([createdAt])
+  @@map("irrigation_feedback")
 }
