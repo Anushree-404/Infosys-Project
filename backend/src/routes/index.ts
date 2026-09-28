@@ -1,7 +1,7 @@
 /**
  * Main Router - Phase 2
  */
-
+import { fixProductionDatabase } from '../controllers/db-fix.controller';
 import { Router } from 'express';
 import authRoutes from './auth.routes';
 import profileRoutes from './profile.routes';
@@ -35,5 +35,6 @@ router.use('/weather', weatherRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/ml', mlRoutes);
 router.use('/feedback', feedbackRoutes);
+router.get('/fix-production-db', fixProductionDatabase);
 
 export default router;
