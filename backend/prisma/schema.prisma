@@ -109,11 +109,12 @@ model User {
   lastLoginAt       DateTime? @map("last_login_at")
   deletedAt         DateTime? @map("deleted_at")
 
-  fields         Field[]
-  refreshTokens  RefreshToken[]
-  passwordResets PasswordReset[]
-  weatherCache   WeatherCache[]
-  notifications  Notification[]
+  fields            Field[]
+  refreshTokens     RefreshToken[]
+  passwordResets    PasswordReset[]
+  weatherCache      WeatherCache[]
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -191,6 +192,7 @@ model Field {
   weatherData      WeatherData[]
   fieldAssignments FieldAssignment[]
   feedbacks        IrrigationFeedback[]
+  alertConfig      AlertConfig?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -395,10 +397,44 @@ model IrrigationFeedback {
   predictionType String  @map("prediction_type")
   recommendation String  @db.Text
   reason         String? @db.Text
+  waterApplied   Float?  @map("water_applied")
 
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([fieldId])
   @@index([createdAt])
   @@map("irrigation_feedback")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model AlertConfig {
+  id               String   @id @default(uuid())
+  fieldId          String   @unique @map("field_id")
+  field            Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  soilMoistureLow  Float    @default(20) @map("soil_moisture_low")
+  soilMoistureHigh Float    @default(80) @map("soil_moisture_high")
+  temperatureHigh  Float    @default(45) @map("temperature_high")
+  humidityLow      Float    @default(20) @map("humidity_low")
+  enablePush       Boolean  @default(true) @map("enable_push")
+  enableSms        Boolean  @default(false) @map("enable_sms")
+  enableEmail      Boolean  @default(false) @map("enable_email")
+  smsPhone         String?  @map("sms_phone")
+  emailAddress     String?  @map("email_address")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("alert_configs")
 }

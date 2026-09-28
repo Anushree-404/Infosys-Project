@@ -13,6 +13,8 @@ import weatherRoutes from './weather.routes';
 import notificationRoutes from './notification.routes';
 import mlRoutes from './ml.routes';
 import feedbackRoutes from './feedback.routes';
+import pushRoutes from './push.routes';
+import reportRoutes from './report.routes';
 
 const router = Router();
 
@@ -35,6 +37,9 @@ router.use('/weather', weatherRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/ml', mlRoutes);
 router.use('/feedback', feedbackRoutes);
+router.use('/push', pushRoutes);
+router.use('/reports', reportRoutes);
+
 router.get('/fix-production-db', fixProductionDatabase);
 
 export default router;
