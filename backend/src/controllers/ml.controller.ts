@@ -5,8 +5,13 @@
 
 import { Request, Response, NextFunction } from 'express';
 import {
-  predictIrrigation, predictTimeSeries, getCropRecommendation,
-  getIrrigationSchedule, checkMLServiceHealth, getModelInfo,
+  predictIrrigation,
+  predictTimeSeries,
+  getCropRecommendation,
+  getCropRecommendationKaggle,
+  getIrrigationSchedule,
+  checkMLServiceHealth,
+  getModelInfo,
 } from '../services/ml.service';
 import { getFieldById } from '../services/field.service';
 import { sendSuccess, sendError } from '../utils/apiResponse';
@@ -211,33 +216,67 @@ export const predictTimeSeriesForField = async (req: Request, res: Response, nex
 };
 
 // ── POST /api/ml/recommend/crop ───────────────────────────────
-export const cropRecommendation = async (req: Request, res: Response, next: NextFunction) => {
+// ── POST /api/ml/recommend/crop ───────────────────────────────
+export const cropRecommendation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { fieldId } = req.params;
     const userId = req.user!.id;
+
     const field = await getFieldById(fieldId, userId);
     const readings = await getLatestReadings(fieldId);
     const agg = aggregateReadings(readings);
 
+    // The deployed ML service uses the Kaggle crop model:
+    // POST /api/kaggle/predict/crop
+    //
+    // Required inputs:
+    // nitrogen, phosphorus, potassium,
+    // temperature, humidity, ph, rainfall
+
     const input = {
-      crop_type:          String(req.body.crop_type    ?? 'Rice'),
-      growth_stage:       String(req.body.growth_stage ?? 'Vegetative'),
-      soil_type:          field.soilType               ?? 'Loamy',
-      season:             String(req.body.season        ?? 'Kharif'),
-      temperature:        (agg.temperature_c  != null ? agg.temperature_c  : (Number(req.body.temperature) || 30)),
-      humidity:           (agg.humidity_pct   != null ? agg.humidity_pct   : (Number(req.body.humidity)    || 65)),
-      rainfall:           (agg.rainfall_mm    != null ? agg.rainfall_mm    : (Number(req.body.rainfall)    || 2)),
-      soil_moisture:      (agg.soil_moisture_pct != null ? agg.soil_moisture_pct : (Number(req.body.soil_moisture) || 40)),
-      evapotranspiration: Number(req.body.evapotranspiration) || 5,
+      nitrogen: Number(req.body.nitrogen) || 90,
+      phosphorus: Number(req.body.phosphorus) || 42,
+      potassium: Number(req.body.potassium) || 43,
+
+      temperature:
+        agg.temperature_c != null
+          ? agg.temperature_c
+          : (Number(req.body.temperature) || 28),
+
+      humidity:
+        agg.humidity_pct != null
+          ? agg.humidity_pct
+          : (Number(req.body.humidity) || 65),
+
+      ph: Number(req.body.ph) || 6.5,
+
+      rainfall:
+        agg.rainfall_mm != null
+          ? agg.rainfall_mm
+          : (Number(req.body.rainfall) || 100),
     };
 
-    const recommendation = await getCropRecommendation(input);
-    if (!recommendation) return sendError(res, 'ML service unavailable', 503);
+    const recommendation = await getCropRecommendationKaggle(input);
+
+    if (!recommendation) {
+      return sendError(res, 'ML service unavailable', 503);
+    }
 
     sendSuccess(res, 'Crop recommendation ready', {
-      fieldId, fieldName: field.name, recommendation, generatedAt: new Date().toISOString(),
+      fieldId,
+      fieldName: field.name,
+      recommendation,
+      dataSource:
+        'Crop_recommendation.csv (2,200 real Kaggle records, 22 crops)',
+      generatedAt: new Date().toISOString(),
     });
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 };
 
 // ── POST /api/ml/recommend/schedule ──────────────────────────
